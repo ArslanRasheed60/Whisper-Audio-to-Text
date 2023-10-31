@@ -1,12 +1,10 @@
-from fastapi import FastAPI, HTTPException, Form
+from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+import shutil
 from fastapi.middleware.cors import CORSMiddleware
-import secrets
+import whisper
 
 app = FastAPI()
-
-
 
 app.add_middleware(
     CORSMiddleware,
@@ -20,19 +18,27 @@ app.add_middleware(
 async def test():
     return {"whisper":"working"}
 
-
-# Define an endpoint to create the Kubernetes Deployment
-@app.post("/ai-transcribe-tiny")
-async def create_deployment(data: Form()):
+@app.post("/transcribe-tiny/")
+async def upload_audio_file(file: UploadFile = File(...)):
     try:
-        item = {"status": "Success", "message": "Pod created successfully.", "pod_name": pod_name}
-        return JSONResponse(content=item, status_code=201)
+        with open("audio.mp3", "wb") as audio_file:
+            shutil.copyfileobj(file.file, audio_file)
+
+        # Load the whisper model and transcribe the audio
+        model = whisper.load_model("tiny")
+        print("reached here")
+        result = model.transcribe("audio.mp3")
+
+        # Return the transcribed text
+        item = {"text": result["text"]}
+        return JSONResponse(content=item, status_code=200)
     except HTTPException as e:
-        item = {"status": f"failed", "message": "An error occured while fetching the container status"}
+        item = {"status": f"failed", "message": "An error occured"}
         return JSONResponse(content=item, status_code=500)
 
 if __name__ == "__main__":
     import uvicorn
 
     # Run the FastAPI app with Uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # uvicorn.run(app, host="143.244.137.207", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=8000)

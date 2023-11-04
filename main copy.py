@@ -25,6 +25,24 @@ app.add_middleware(
 async def test():
     return {"whisper":"working"}
 
+# @app.post("/transcribe-tiny/")
+# async def upload_audio_file(file: UploadFile = File(...)):
+#     try:
+#         with open("audio.mp3", "wb") as audio_file:
+#             shutil.copyfileobj(file.file, audio_file)
+
+#         # Load the whisper model and transcribe the audio
+#         model = whisper.load_model("tiny")
+#         print("reached tiny")
+#         result = model.transcribe("audio.mp3")
+
+#         # Return the transcribed text
+#         item = {"text": result["text"]}
+#         return JSONResponse(content=item, status_code=200)
+#     except HTTPException as e:
+#         item = {"status": f"failed", "message": "An error occured"}
+#         return JSONResponse(content=item, status_code=500)
+
 @app.post("/transcribe-tiny/")
 async def transcribe_audio_from_url(whisperAudioUrl: WhisperAudioURL):
     try:

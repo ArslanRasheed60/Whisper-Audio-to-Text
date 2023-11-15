@@ -3,3 +3,4 @@ uvicorn
 pyngrok
 openai-whisper
 python-multipart
+firebase-admin
